@@ -115,4 +115,11 @@ describe('mock-first API surface', () => {
 
     expect(response.body.data.kind).toBe('simulation');
   });
+
+  describe('GET /api/v1/reels/:id/stream', () => {
+    it('returns 404 for missing reel', async () => {
+      const res = await request(app).get('/api/v1/reels/nonexistent/stream');
+      expect(res.status).toBe(404);
+    });
+  });
 });

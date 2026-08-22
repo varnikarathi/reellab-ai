@@ -1,3 +1,6 @@
+import { isDbConnected } from '../config/db';
+import { Reel as ReelModel } from '../models/Reel';
+
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -32,7 +35,22 @@ export function registerUpload(file: Express.Multer.File): Reel {
   return memoryStore.put(COLLECTIONS.reels, reel.id, reel);
 }
 
-export function getReel(reelId: string): Reel {
+export async function getReel(reelId: string): Promise<Reel> {
+  if (isDbConnected()) {
+    const doc = await ReelModel.findOne({ reelId });
+    if (doc) {
+      return {
+        id: doc.reelId,
+        filename: doc.filename,
+        storagePath: doc.storagePath,
+        sizeBytes: doc.sizeBytes,
+        durationSeconds: doc.durationSeconds,
+        uploadedAt: doc.createdAt ? doc.createdAt.toISOString() : new Date().toISOString(),
+        status: doc.status as Reel['status'],
+      };
+    }
+  }
+
   const reel = memoryStore.get<Reel>(COLLECTIONS.reels, reelId);
   if (!reel) throw ApiError.notFound('Reel', reelId);
   return reel;
@@ -51,7 +69,7 @@ export async function analyzeReel(
   let reel: Reel | undefined;
 
   if (input.reelId) {
-    reel = getReel(input.reelId);
+    reel = await getReel(input.reelId);
     videoPath = path.resolve(reel.storagePath);
   } else if (videoPath) {
     videoPath = path.resolve(videoPath);

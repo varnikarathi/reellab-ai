@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { postAnalyzeReel, postUploadReel, getReelById } from '../controllers/reelsController';
+import { postAnalyzeReel, postUploadReel, getReelById, getReelStream } from '../controllers/reelsController';
 import { uploadReel } from '../middleware/upload';
 import { asyncHandler } from '../utils/asyncHandler';
 
@@ -10,5 +10,6 @@ router.post('/upload', uploadReel, asyncHandler(postUploadReel));
 router.post('/analyze', asyncHandler(postAnalyzeReel));
 
 router.get('/:id', asyncHandler(getReelById));
+router.get('/:id/stream', asyncHandler(getReelStream));
 
 export default router;
