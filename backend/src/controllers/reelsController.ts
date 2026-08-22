@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 
 import { analyzeReel, registerUpload } from '../services/reelService';
 import { ApiError } from '../utils/ApiError';
+import { Reel } from '../models/Reel';
 import { sendData } from '../utils/respond';
 
 /** `POST /api/v1/reels/upload` — multipart, field name `reel`. */
@@ -19,4 +20,14 @@ export async function postAnalyzeReel(req: Request, res: Response): Promise<void
   const body = (req.body ?? {}) as { reelId?: string; videoPath?: string };
   const resolved = await analyzeReel(body, req.requestId);
   sendData(req, res, resolved, 200);
+}
+
+
+/** `GET /api/v1/reels/:id` */
+export async function getReelById(req: Request, res: Response): Promise<void> {
+  const reel = await Reel.findOne({ reelId: req.params.id });
+  if (!reel) {
+    throw ApiError.notFound('Reel', req.params.id);
+  }
+  sendData(req, res, { data: reel, mock: false }, 200);
 }

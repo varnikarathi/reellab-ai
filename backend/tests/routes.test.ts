@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { Reel } from '../src/models/Reel';
 
 import { createApp } from '../src/app';
 
@@ -36,6 +37,13 @@ describe('mock-first API surface', () => {
       .expect(201);
 
     expect(response.body.data.request.targetAudience).toBe('General audience');
+  });
+
+
+  it('retrieves a reel by id', async () => {
+    jest.spyOn(Reel, 'findOne').mockResolvedValueOnce(null);
+    const response = await request(app).get('/api/v1/reels/reel_not_found').expect(404);
+    expect(response.body.error.code).toBe('NOT_FOUND');
   });
 
   it('analyzes a reel into Content DNA', async () => {
